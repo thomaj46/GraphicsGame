@@ -79,7 +79,7 @@ public class ThingWeAreSeeking extends GameObject {
 		glu.gluDisk(top, 0.0, bounding_cir_rad + 10.0, 15, 5);
 		gl.glPopMatrix();
 
-		// But the hero's eye will see a volkswagen
+		// But the hero's eye will see an off object
 		gl.glPushMatrix();
 		gl.glTranslated(x, 10.0, z);
 		gl.glScalef(5, 5, 5);

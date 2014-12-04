@@ -1,5 +1,7 @@
 import java.awt.*;
 import java.awt.event.*;
+
+import com.jogamp.graph.curve.opengl.TextRenderer;
 import com.jogamp.opengl.util.FPSAnimator;
 import javax.media.opengl.*;
 import javax.media.opengl.glu.*;
@@ -47,7 +49,7 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 	int score;
 	int lastScore;
 	int highScore;
-
+	
 	Hero the_hero; // Three objects on the playing field to
 	ThingWeAreSeeking the_thing; // start with, each with its own display list.
 	Villain the_villain; // Adding more will be good for GGW points
@@ -92,7 +94,7 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 		gl.glEnable(GL2.GL_LIGHT0);
 		gl.glEnable(GL2.GL_DEPTH_TEST);
 		gl.glEnable(GL2.GL_CULL_FACE); // Why?
-
+		
 		eyex = ARENASIZE / 2.0; // Where the hero starts
 		eyez = -ARENASIZE / 2.0;
 
@@ -103,7 +105,7 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 		the_villain = new Villain((3 * ARENASIZE) / 4.0, 0.0, -ARENASIZE / 4.0, 0, 10.0, displayListBase + 2, this, drawable);
 
 		aspect = (double) width / (double) height;
-
+	    
 		gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_AMBIENT, la0, 0);
 		gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_DIFFUSE, ld0, 0);
 		gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_SPECULAR, ls0, 0);
@@ -117,11 +119,40 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 
 		GL2 gl = drawable.getGL().getGL2();
 
-		int horiz_offset, vert_offset;
+		//int horiz_offset, vert_offset;
+		int horiz_offset = (int) (width * (1.0 - HERO_VP) / 6.0);
+		int vert_offset = height / 6;
 		
+		// light grey background
 		gl.glClearColor(0.4f, 0.4f, 0.4f, 1.0f);
+		//Black Background
+		//gl.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		gl.glClear(GL2.GL_DEPTH_BUFFER_BIT | GL2.GL_COLOR_BUFFER_BIT);
-
+		
+		// Score Box
+		gl.glViewport(625, 575, 400, 100);
+		gl.glDisable(GL2.GL_LIGHTING);
+		gl.glColor3f(1.0f, 0.0f, 0.0f); 
+	    gl.glRasterPos2f(0.0f, 0.0f); // <-- position of text 
+	    glut.glutBitmapString(GLUT.BITMAP_HELVETICA_18, "High Score");
+	    gl.glColor3f(1.0f, 0.0f, 0.0f); 
+	    gl.glRasterPos2f(300.0f, 0.0f); // <-- position of text 
+	    glut.glutBitmapString(GLUT.BITMAP_HELVETICA_18, "Last Score");
+	    gl.glColor3f(1.0f, 0.0f, 0.0f); 
+	    gl.glRasterPos2f(600.0f, 0.0f); // <-- position of text 
+	    glut.glutBitmapString(GLUT.BITMAP_HELVETICA_18, "Current Score");
+	    gl.glViewport(625, 550, 400, 100);
+	    gl.glColor3f(1.0f, 0.0f, 0.0f); 
+	    gl.glRasterPos2f(100.0f, 0.0f); // <-- position of text 
+	    glut.glutBitmapString(GLUT.BITMAP_HELVETICA_18, String.valueOf(highScore));
+	    gl.glColor3f(1.0f, 0.0f, 0.0f); 
+	    gl.glRasterPos2f(400.0f, 0.0f); // <-- position of text 
+	    glut.glutBitmapString(GLUT.BITMAP_HELVETICA_18, String.valueOf(lastScore));
+	    gl.glColor3f(1.0f, 0.0f, 0.0f); 
+	    gl.glRasterPos2f(700.0f, 0.0f); // <-- position of text 
+	    glut.glutBitmapString(GLUT.BITMAP_HELVETICA_18, String.valueOf(score));
+	    gl.glEnable(GL2.GL_LIGHTING);
+	
 		// Hero's eye viewport
 		gl.glViewport(vp1_left, vp1_bottom, (int) (HERO_VP * width), height);
 		gl.glMatrixMode(GL2.GL_PROJECTION);
@@ -135,8 +166,7 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 		showObjects(drawable);
 
 		// Overhead viewport
-		horiz_offset = (int) (width * (1.0 - HERO_VP) / 6.0);
-		vert_offset = height / 6;
+		
 		gl.glViewport(vp1_left + (int) (HERO_VP * width) + horiz_offset, vp1_bottom + vert_offset, 4 * horiz_offset, 4 * vert_offset);
 		gl.glMatrixMode(GL2.GL_PROJECTION);
 		gl.glLoadIdentity();
@@ -145,6 +175,7 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 		gl.glMatrixMode(GL2.GL_MODELVIEW);
 		gl.glLoadIdentity();
 		glu.gluLookAt(500., 100., -500., 500., 0., -500., 0., 0., -1.);
+		
 		showArena(drawable);
 		showObjects(drawable);
 		chaseHero();
@@ -234,11 +265,11 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 		}
 		
 		if (the_villain.willCollide(the_hero)) {
-			this.score = 0;
 			the_hero.reset();
 			the_villain.reset();
 			the_thing.reset();
 			checkForHighScore();
+			this.score = 0;
 		}
 	}
 	

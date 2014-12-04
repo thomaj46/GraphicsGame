@@ -37,7 +37,7 @@ public class Hero extends GameObject {
       gl.glRotated(-90.0,  1.0,0.0,0.0);
       gl.glCallList(my_display_list);
       gl.glPopMatrix();
-      System.out.println(this.degrees);
+      //System.out.println(this.degrees);
   }
 
 }
