@@ -45,6 +45,7 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 	float yellow[] = { 1.0f, 1.0f, 0.0f, 1.0f }; // pure yellow
 	int displayListBase;
 	int score;
+	int lastScore;
 	int highScore;
 
 	Hero the_hero; // Three objects on the playing field to
@@ -237,7 +238,15 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 			the_hero.reset();
 			the_villain.reset();
 			the_thing.reset();
+			checkForHighScore();
 		}
+	}
+	
+	void checkForHighScore() {
+		if (score > highScore) {
+			highScore = score;
+		}
+		lastScore = score;
 	}
 	
 	void chaseHero() {
@@ -271,12 +280,12 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 		case KeyEvent.VK_DOWN:
 		case KeyEvent.VK_S:
 			// Move backward
-			the_hero.move(-5.0);
+			the_hero.move(-8.0);
 			break;
 		case KeyEvent.VK_UP:
 		case KeyEvent.VK_W:
 			// Move forward
-			the_hero.move(5.0);
+			the_hero.move(8.0);
 			break;
 		case KeyEvent.VK_LEFT:
 		case KeyEvent.VK_A:
