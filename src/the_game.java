@@ -39,8 +39,9 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 	static int vp1_bottom = 0;
 	
 	static Texture[] texture = new Texture[3]; 
-	static double villainSpeed = .3;
+	static double villainSpeed = .5;
 	int gameStatus = 0; // 0 - Retry, 1, Start over
+	static boolean heroAlive = true;
 	Random random;
 
 	float ga[] = { 0.2f, 0.2f, 0.2f, 1.0f }; // global ambient light intensity
@@ -157,20 +158,20 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 		gl.glViewport(625, 575, 400, 100);
 		gl.glDisable(GL2.GL_LIGHTING);
 		gl.glColor3f(1.0f, 1.0f, 0.0f);
-	    gl.glRasterPos2f(0.0f, 0.0f); // <-- position of text 
+	    gl.glRasterPos2f(10.0f, 0.0f); // <-- position of text 
 	    glut.glutBitmapString(GLUT.BITMAP_HELVETICA_18, "High Score");
 	    gl.glColor3f(1.0f, 1.0f, 0.0f);
-	    gl.glRasterPos2f(300.0f, 0.0f); // <-- position of text 
+	    gl.glRasterPos2f(310.0f, 0.0f); // <-- position of text 
 	    glut.glutBitmapString(GLUT.BITMAP_HELVETICA_18, "Last Score");
 	    gl.glColor3f(1.0f, 1.0f, 0.0f);
 	    gl.glRasterPos2f(600.0f, 0.0f); // <-- position of text 
 	    glut.glutBitmapString(GLUT.BITMAP_HELVETICA_18, "Current Score");
 	    gl.glViewport(625, 550, 400, 100);
 	    gl.glColor3f(1.0f, 1.0f, 0.0f); 
-	    gl.glRasterPos2f(100.0f, 0.0f); // <-- position of text 
+	    gl.glRasterPos2f(110.0f, 0.0f); // <-- position of text 
 	    glut.glutBitmapString(GLUT.BITMAP_HELVETICA_18, String.valueOf(highScore));
 	    gl.glColor3f(1.0f, 1.0f, 0.0f);
-	    gl.glRasterPos2f(400.0f, 0.0f); // <-- position of text 
+	    gl.glRasterPos2f(410.0f, 0.0f); // <-- position of text 
 	    glut.glutBitmapString(GLUT.BITMAP_HELVETICA_18, String.valueOf(lastScore));
 	    gl.glColor3f(1.0f, 1.0f, 0.0f);
 	    gl.glRasterPos2f(700.0f, 0.0f); // <-- position of text 
@@ -294,12 +295,13 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 			if (this.score % 3 == 0) {
 				countVillains += 1;
 			} 
-			villainSpeed += .05;
+			villainSpeed += .08;
 			
 		}
 		for (int i = 0; i < countVillains; i++) {
 			if (villain_array[i].willCollide(the_hero)) {
 				gameStatus = 1;
+				
 				
 				switch (gameStatus) {
 					case 0: // Reset All Scores and Start Over Entirely
@@ -310,6 +312,7 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 						this.score = 0;
 						this.lastScore = 0;
 						villainSpeed = .3;
+						heroAlive = false;
 						break;
 					case 1: // Keeps High Score and Last Score and Start Over
 						the_hero.reset();
@@ -320,7 +323,13 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 						this.lastScore = this.score;
 						this.score = 0;
 						villainSpeed = .3;
+						heroAlive = false;
 						break;
+				}
+				try {
+				    TimeUnit.SECONDS.sleep(5);
+				} catch (InterruptedException e) {
+				    //Handle exception
 				}
 				countVillains = 1;
 			}
