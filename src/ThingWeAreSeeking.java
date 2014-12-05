@@ -1,8 +1,11 @@
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Random;
 
 import com.jogamp.opengl.util.FPSAnimator;
+import com.jogamp.opengl.util.GLBuffers;
 
 import javax.media.opengl.*;
 import javax.media.opengl.glu.*;
@@ -10,6 +13,8 @@ import javax.media.opengl.awt.GLJPanel;
 import javax.swing.*;
 
 import com.jogamp.opengl.util.gl2.GLUT;
+import com.jogamp.opengl.util.texture.Texture;
+import com.jogamp.opengl.util.texture.TextureIO;
 
 // We're currently seeking Phong's Volkswagen
 
@@ -28,7 +33,7 @@ public class ThingWeAreSeeking extends GameObject {
 		super(x, y, z, degrees, bounding_cir_rad, display_list, playing_field, drawable);
 		this.random = new Random();
 		GL2 gl = drawable.getGL().getGL2();
-		off_obj = new off_file_object("dodecahedron.off", false); // This off file
+		off_obj = new off_file_object("epcot.off", false); // This off file dodecahedron
 																// specifies
 																// vertices in
 																// CW
@@ -76,15 +81,17 @@ public class ThingWeAreSeeking extends GameObject {
 		glu.gluQuadricNormals(top, GLU.GLU_SMOOTH);
 		gl.glTranslated(x, 40.0, z);
 		gl.glRotated(-90.0, 1.0, 0.0, 0.0);
-		glu.gluDisk(top, 0.0, bounding_cir_rad + 10.0, 15, 5);
+		glu.gluDisk(top, 0.0, 25.0, 15, 5);
 		gl.glPopMatrix();
 
 		// But the hero's eye will see an off object
+        
 		gl.glPushMatrix();
 		gl.glTranslated(x, 10.0, z);
 		gl.glScalef(5, 5, 5);
 		gl.glCallList(my_display_list);
 		gl.glPopMatrix();
+
 	}
 	
 	void teleport() {

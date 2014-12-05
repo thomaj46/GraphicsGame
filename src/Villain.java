@@ -60,15 +60,15 @@ public class Villain extends GameObject {
 
 		if (deltaX > deltaZ) {
 			if (this.x > hero.x) {
-				this.x -= .5;
+				this.x -= the_game.villainSpeed;
 			} else {
-				this.x += .5;
+				this.x += the_game.villainSpeed;;
 			}
 		} else {
 			if (this.z >= hero.z) {
-				this.z -= .5;
+				this.z -= the_game.villainSpeed;;
 			} else {
-				this.z += .5;
+				this.z += the_game.villainSpeed;;
 			}
 		}
 	}

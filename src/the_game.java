@@ -1,5 +1,6 @@
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 
 import com.jogamp.graph.curve.opengl.TextRenderer;
 import com.jogamp.opengl.util.FPSAnimator;
@@ -7,7 +8,9 @@ import javax.media.opengl.*;
 import javax.media.opengl.glu.*;
 import javax.media.opengl.awt.GLJPanel;
 import javax.swing.*;
+
 import com.jogamp.opengl.util.gl2.GLUT;
+import com.jogamp.opengl.util.texture.*;
 
 public class the_game extends JFrame implements GLEventListener, KeyListener {
 	static GLU glu;
@@ -32,6 +35,9 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 	static int height = 625;
 	static int vp1_left = 0; // Left viewport -- the hero's view
 	static int vp1_bottom = 0;
+	
+	static Texture[] texture = new Texture[3]; 
+	static double villainSpeed = .3;
 
 	float ga[] = { 0.2f, 0.2f, 0.2f, 1.0f }; // global ambient light intensity
 	float la0[] = { 0.0f, 0.0f, 0.0f, 1.0f }; // light 0 ambient intensity
@@ -253,8 +259,11 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 	}
 
 	void showObjects(GLAutoDrawable drawable) {
-		the_thing.draw_self(drawable);
+		
 		the_hero.draw_self(drawable);
+
+		the_thing.draw_self(drawable);
+		
 		the_villain.draw_self(drawable);
 	}
 	
@@ -262,6 +271,7 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 		if(the_hero.willCollide(the_thing)) {
 			the_thing.teleport();
 			this.score += 1;
+			villainSpeed += .05;
 		}
 		
 		if (the_villain.willCollide(the_hero)) {
@@ -270,6 +280,7 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 			the_thing.reset();
 			checkForHighScore();
 			this.score = 0;
+			villainSpeed = .3;
 		}
 	}
 	
