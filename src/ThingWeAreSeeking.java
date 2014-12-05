@@ -33,10 +33,7 @@ public class ThingWeAreSeeking extends GameObject {
 		super(x, y, z, degrees, bounding_cir_rad, display_list, playing_field, drawable);
 		this.random = new Random();
 		GL2 gl = drawable.getGL().getGL2();
-		off_obj = new off_file_object("epcot.off", false); // This off file dodecahedron
-																// specifies
-																// vertices in
-																// CW
+		off_obj = new off_file_object("epcot.off", false); // This off file specifies vertices in CW
 		off_obj.load_off_file();
 
 		gl.glNewList(my_display_list, GL2.GL_COMPILE);

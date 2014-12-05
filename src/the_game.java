@@ -106,7 +106,7 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 
 		displayListBase = gl.glGenLists(4); // Only three currently used for the
 											// 3 objects
-		the_hero = new Hero(eyex, 0.0, eyez, 135, 10.0, displayListBase, this, drawable);
+		the_hero = new Hero(eyex, 0.0, eyez, 39, 10.0, displayListBase, this, drawable); //135
 		the_thing = new ThingWeAreSeeking(ARENASIZE / 4.0, 0.0, -ARENASIZE / 4.0, 0, 30.0, displayListBase + 1, this, drawable);
 		the_villain = new Villain((3 * ARENASIZE) / 4.0, 0.0, -ARENASIZE / 4.0, 0, 10.0, displayListBase + 2, this, drawable);
 
