@@ -1,6 +1,8 @@
+
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -9,10 +11,10 @@ import com.jogamp.opengl.util.FPSAnimator;
 import javax.media.opengl.*;
 import javax.media.opengl.glu.*;
 import javax.media.opengl.awt.GLJPanel;
+import com.jogamp.opengl.util.texture.*;
 import javax.swing.*;
 
 import com.jogamp.opengl.util.gl2.GLUT;
-import com.jogamp.opengl.util.texture.*;
 
 public class the_game extends JFrame implements GLEventListener, KeyListener {
 	static GLU glu;
@@ -37,8 +39,7 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 	static int height = 625;
 	static int vp1_left = 0; // Left viewport -- the hero's view
 	static int vp1_bottom = 0;
-	
-	static Texture[] texture = new Texture[3]; 
+
 	static double villainSpeed = .5;
 	int gameStatus = 0; // 0 - Retry, 1, Start over
 	static boolean heroAlive = true;
@@ -69,10 +70,9 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 	int highScore;
 	Villain[] villain_array;
 	int countVillains = 1;
-	
+
 	Hero the_hero; // Three objects on the playing field to
 	ThingWeAreSeeking the_thing; // start with, each with its own display list.
-	Villain the_villain; // Adding more will be good for GGW points
 
 	public the_game() {
 		super("the_game");
@@ -114,23 +114,40 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 		gl.glEnable(GL2.GL_LIGHT0);
 		gl.glEnable(GL2.GL_DEPTH_TEST);
 		gl.glEnable(GL2.GL_CULL_FACE); // Why?
-		
+
 		eyex = ARENASIZE / 2.0; // Where the hero starts
 		eyez = -ARENASIZE / 2.0;
 
 		displayListBase = gl.glGenLists(4); // Only three currently used for the
-											// 3 objects
+		// 3 objects
+
+		// Load textures.
+		Texture villainTexture = null;
+		Texture thingTexture = null;
+		try {
+			TextureData data = TextureIO.newTextureData(GLProfile.getDefault(), getClass().getResourceAsStream("minecraft-creeper.jpg"), false, "jpg");
+			villainTexture = TextureIO.newTexture(data);
+			data = TextureIO.newTextureData(GLProfile.getDefault(), getClass().getResourceAsStream("firemap.jpg"), false, "jpg");
+			thingTexture = TextureIO.newTexture(data);
+		}
+		catch (IOException exc) {
+			exc.printStackTrace();
+			System.exit(1);
+		}
+
 		the_hero = new Hero(eyex, 0.0, eyez, 135, 10.0, displayListBase, this, drawable);
-		the_thing = new ThingWeAreSeeking(ARENASIZE / 4.0, 0.0, -ARENASIZE / 4.0, 0, 30.0, displayListBase + 1, this, drawable);
+		the_thing = new ThingWeAreSeeking(ARENASIZE / 4.0, 0.0, -ARENASIZE / 4.0, 0, 30.0, displayListBase + 1, this, drawable, thingTexture);
+
 		//Create and fill Villain Array Max 30 Villains
 		villain_array = new Villain[30];
 		for (int i = 0; i < villain_array.length;i++) {
-			villain_array[i] = new Villain((3 * ARENASIZE) / 4.0, 0.0, -ARENASIZE / 4.0, 0, 10.0, displayListBase + 2, this, drawable);
+			villain_array[i] = new Villain((3 * ARENASIZE) / 4.0, 0.0, -ARENASIZE / 4.0, 0, 10.0, displayListBase + 2, this, drawable, villainTexture);
 		}
 		//the_villain = new Villain((3 * ARENASIZE) / 4.0, 0.0, -ARENASIZE / 4.0, 0, 10.0, displayListBase + 2, this, drawable);
 
+
 		aspect = (double) width / (double) height;
-	    
+
 		gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_AMBIENT, la0, 0);
 		gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_DIFFUSE, ld0, 0);
 		gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_SPECULAR, ls0, 0);
@@ -147,37 +164,37 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 		//int horiz_offset, vert_offset;
 		int horiz_offset = (int) (width * (1.0 - HERO_VP) / 6.0);
 		int vert_offset = height / 6;
-		
+
 		// light grey background
 		// gl.glClearColor(0.4f, 0.4f, 0.4f, 1.0f);
 		// Other Background
 		gl.glClearColor(0.0f, 0.0f, 1.0f, 0.2f);
 		gl.glClear(GL2.GL_DEPTH_BUFFER_BIT | GL2.GL_COLOR_BUFFER_BIT);
-		
+
 		// Score Box
 		gl.glViewport(625, 575, 400, 100);
 		gl.glDisable(GL2.GL_LIGHTING);
 		gl.glColor3f(1.0f, 1.0f, 0.0f);
-	    gl.glRasterPos2f(10.0f, 0.0f); // <-- position of text 
-	    glut.glutBitmapString(GLUT.BITMAP_HELVETICA_18, "High Score");
-	    gl.glColor3f(1.0f, 1.0f, 0.0f);
-	    gl.glRasterPos2f(310.0f, 0.0f); // <-- position of text 
-	    glut.glutBitmapString(GLUT.BITMAP_HELVETICA_18, "Last Score");
-	    gl.glColor3f(1.0f, 1.0f, 0.0f);
-	    gl.glRasterPos2f(600.0f, 0.0f); // <-- position of text 
-	    glut.glutBitmapString(GLUT.BITMAP_HELVETICA_18, "Current Score");
-	    gl.glViewport(625, 550, 400, 100);
-	    gl.glColor3f(1.0f, 1.0f, 0.0f); 
-	    gl.glRasterPos2f(110.0f, 0.0f); // <-- position of text 
-	    glut.glutBitmapString(GLUT.BITMAP_HELVETICA_18, String.valueOf(highScore));
-	    gl.glColor3f(1.0f, 1.0f, 0.0f);
-	    gl.glRasterPos2f(410.0f, 0.0f); // <-- position of text 
-	    glut.glutBitmapString(GLUT.BITMAP_HELVETICA_18, String.valueOf(lastScore));
-	    gl.glColor3f(1.0f, 1.0f, 0.0f);
-	    gl.glRasterPos2f(700.0f, 0.0f); // <-- position of text 
-	    glut.glutBitmapString(GLUT.BITMAP_HELVETICA_18, String.valueOf(score));
-	    gl.glEnable(GL2.GL_LIGHTING);
-	
+		gl.glRasterPos2f(10.0f, 0.0f); // <-- position of text
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_18, "High Score");
+		gl.glColor3f(1.0f, 1.0f, 0.0f);
+		gl.glRasterPos2f(310.0f, 0.0f); // <-- position of text
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_18, "Last Score");
+		gl.glColor3f(1.0f, 1.0f, 0.0f);
+		gl.glRasterPos2f(600.0f, 0.0f); // <-- position of text
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_18, "Current Score");
+		gl.glViewport(625, 550, 400, 100);
+		gl.glColor3f(1.0f, 1.0f, 0.0f);
+		gl.glRasterPos2f(110.0f, 0.0f); // <-- position of text
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_18, String.valueOf(highScore));
+		gl.glColor3f(1.0f, 1.0f, 0.0f);
+		gl.glRasterPos2f(410.0f, 0.0f); // <-- position of text
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_18, String.valueOf(lastScore));
+		gl.glColor3f(1.0f, 1.0f, 0.0f);
+		gl.glRasterPos2f(700.0f, 0.0f); // <-- position of text
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_18, String.valueOf(score));
+		gl.glEnable(GL2.GL_LIGHTING);
+
 		// Hero's eye viewport
 		gl.glViewport(vp1_left, vp1_bottom, (int) (HERO_VP * width), height);
 		gl.glMatrixMode(GL2.GL_PROJECTION);
@@ -191,7 +208,7 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 		showObjects(drawable);
 
 		// Overhead viewport
-		
+
 		gl.glViewport(vp1_left + (int) (HERO_VP * width) + horiz_offset, vp1_bottom + vert_offset, 4 * horiz_offset, 4 * vert_offset);
 		gl.glMatrixMode(GL2.GL_PROJECTION);
 		gl.glLoadIdentity();
@@ -200,7 +217,7 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 		gl.glMatrixMode(GL2.GL_MODELVIEW);
 		gl.glLoadIdentity();
 		glu.gluLookAt(500., 100., -500., 500., 0., -500., 0., 0., -1.);
-		
+
 		showArena(drawable);
 		showObjects(drawable);
 		chaseHero();
@@ -278,7 +295,7 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 	}
 
 	void showObjects(GLAutoDrawable drawable) {
-		
+
 		the_hero.draw_self(drawable);
 		the_thing.draw_self(drawable);
 		for(int i = 0; i < countVillains; i++) {
@@ -286,7 +303,7 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 		}
 		//the_villain.draw_self(drawable);
 	}
-	
+
 	void checkCollisions(GLAutoDrawable drawable) {
 		Random random = new Random();
 		if(the_hero.willCollide(the_thing)) {
@@ -294,15 +311,15 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 			the_thing.teleport();
 			if (this.score % 3 == 0) {
 				countVillains += 1;
-			} 
+			}
 			villainSpeed += .08;
-			
+
 		}
 		for (int i = 0; i < countVillains; i++) {
 			if (villain_array[i].willCollide(the_hero)) {
 				gameStatus = 1;
-				
-				
+
+
 				switch (gameStatus) {
 					case 0: // Reset All Scores and Start Over Entirely
 						the_hero.reset();
@@ -327,22 +344,22 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 						break;
 				}
 				try {
-				    TimeUnit.SECONDS.sleep(5);
+					TimeUnit.SECONDS.sleep(5);
 				} catch (InterruptedException e) {
-				    //Handle exception
+					//Handle exception
 				}
 				countVillains = 1;
 			}
 		}
 	}
-	
+
 	void checkForHighScore() {
 		if (score > highScore) {
 			highScore = score;
 		}
 		lastScore = score;
 	}
-	
+
 	void chaseHero() {
 		for (int i = 0; i < countVillains; i++) {
 			villain_array[i].chase(the_hero);
@@ -365,44 +382,44 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 	public void keyPressed(KeyEvent key) {
 		int ch = key.getKeyCode();
 		switch (ch) {
-		case 27:
-			new Thread() {
-				public void run() {
-					animator.stop();
-				}
-			}.start();
-			System.exit(0);
-			break;
-		case KeyEvent.VK_DOWN:
-		case KeyEvent.VK_S:
-			// Move backward
-			the_hero.move(-8.0);
-			break;
-		case KeyEvent.VK_UP:
-		case KeyEvent.VK_W:
-			// Move forward
-			the_hero.move(8.0);
-			break;
-		case KeyEvent.VK_LEFT:
-		case KeyEvent.VK_A:
-			// Turn left
-			the_hero.turn(-2);
-			break;
-		case KeyEvent.VK_RIGHT:
-		case KeyEvent.VK_D:
-			// Turn right
-			the_hero.turn(2);
-			break;
-		case KeyEvent.VK_ENTER:
-			// Reset the Game and all Scores
-			//gameStatus = 0;
-			break;
-		case KeyEvent.VK_SPACE:
-			// Try Again and Keep High Score
-			//gameStatus = 1;
-			break;
-		default:
-			break;
+			case 27:
+				new Thread() {
+					public void run() {
+						animator.stop();
+					}
+				}.start();
+				System.exit(0);
+				break;
+			case KeyEvent.VK_DOWN:
+			case KeyEvent.VK_S:
+				// Move backward
+				the_hero.move(-8.0);
+				break;
+			case KeyEvent.VK_UP:
+			case KeyEvent.VK_W:
+				// Move forward
+				the_hero.move(8.0);
+				break;
+			case KeyEvent.VK_LEFT:
+			case KeyEvent.VK_A:
+				// Turn left
+				the_hero.turn(-2);
+				break;
+			case KeyEvent.VK_RIGHT:
+			case KeyEvent.VK_D:
+				// Turn right
+				the_hero.turn(2);
+				break;
+			case KeyEvent.VK_ENTER:
+				// Reset the Game and all Scores
+				//gameStatus = 0;
+				break;
+			case KeyEvent.VK_SPACE:
+				// Try Again and Keep High Score
+				//gameStatus = 1;
+				break;
+			default:
+				break;
 		}
 
 	}
