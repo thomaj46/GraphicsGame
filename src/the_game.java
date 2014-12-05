@@ -90,7 +90,7 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 		canvas.addKeyListener(myself);
 		animator = new FPSAnimator(canvas, 60);
 
-		JFrame frame = new JFrame("the_game");
+		JFrame frame = new JFrame("Grab Life by the Fireballs!");
 		frame.setSize(width, height); // Size in pixels of the frame we draw on
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().add(canvas);
@@ -119,7 +119,7 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 
 		displayListBase = gl.glGenLists(4); // Only three currently used for the
 											// 3 objects
-		the_hero = new Hero(eyex, 0.0, eyez, 39, 10.0, displayListBase, this, drawable); //135
+		the_hero = new Hero(eyex, 0.0, eyez, 135, 10.0, displayListBase, this, drawable);
 		the_thing = new ThingWeAreSeeking(ARENASIZE / 4.0, 0.0, -ARENASIZE / 4.0, 0, 30.0, displayListBase + 1, this, drawable);
 		//Create and fill Villain Array Max 30 Villains
 		villain_array = new Villain[30];
@@ -299,7 +299,7 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 		}
 		for (int i = 0; i < countVillains; i++) {
 			if (villain_array[i].willCollide(the_hero)) {
-				gameStatus = 0;
+				gameStatus = 1;
 				
 				switch (gameStatus) {
 					case 0: // Reset All Scores and Start Over Entirely
@@ -311,13 +311,14 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 						this.lastScore = 0;
 						villainSpeed = .3;
 						break;
-					case 1: // Keeps High Score Only and Start Over
+					case 1: // Keeps High Score and Last Score and Start Over
 						the_hero.reset();
 						villain_array[i].reset();
 						the_thing.reset();
 						checkForHighScore();
 						this.score = 0;
-						this.lastScore = 0;
+						this.lastScore = this.score;
+						this.score = 0;
 						villainSpeed = .3;
 						break;
 				}
