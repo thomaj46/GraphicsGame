@@ -23,7 +23,7 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 	static GLCapabilities caps;
 	static FPSAnimator animator;
 
-	static float WALLHEIGHT = 130.0f; // Some playing field parameters
+	static float WALLHEIGHT = 200.0f; // Some playing field parameters
 	static float ARENASIZE = 1000.0f;
 	static float EYEHEIGHT = 25.0f;
 	static float HERO_VP = 0.625f;
@@ -56,7 +56,7 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 //	float ms[] = { 0.6f, 0.7f, 0.6f, 1.0f }; // material specular
 //	int me = 75; // shininess exponent
 	float ma[] = { 0.02f, 0.0f, 0.02f, 1.0f }; // material ambient
-	float md[] = { 0.9f, 0.0f, 0.01f, 1.0f }; // material diffuse
+	float md[] = { 0.5f, 0.5f, 0.05f, 1.0f }; // material diffuse
 	float ms[] = { 0.2f, 0.2f, 0.3f, 1.0f }; // material specular
 	int me = 8; // shininess exponent
 	float red[] = { 1.0f, 0.0f, 0.0f, 1.0f }; // pure red
@@ -336,7 +336,6 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 						villain_array[i].reset();
 						the_thing.reset();
 						checkForHighScore();
-						this.score = 0;
 						this.lastScore = this.score;
 						this.score = 0;
 						villainSpeed = .3;
