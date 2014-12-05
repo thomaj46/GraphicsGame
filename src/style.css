@@ -1,0 +1,73 @@
+body{
+margin:0;
+padding:0;
+line-height: 1.5em;
+}
+
+b{font-size: 110%;}
+em{color: red;}
+
+#topsection{
+background: #EAEAEA;
+height: 90px; /*Height of top section*/
+}
+
+#topsection h1{
+margin: 0;
+padding-top: 15px;
+}
+
+#contentwrapper{
+float: left;
+width: 100%;
+margin-left: -20%; /*Set left margin to -(RightColumnWidth)*/
+}
+
+h3 {
+	text-decoration: underline;
+	margin-left:20px;
+	color:#DA0;
+}
+
+#subitem {
+	margin-left:30px;
+}
+
+li {
+	margin-left:-15px;
+}
+
+#contentcolumn{
+margin: 0 190px 0 20% /*Set margin to 0 (LeftColumnWidth) 0 (RightColumnWidth)*/
+}
+
+#leftcolumn{
+float: left;
+width: 190px; /*Width of left column in pixels*/
+margin-left: -190px; /*Set left margin to -(LeftColumnWidth)*/
+background: #C8FC98;
+}
+
+#rightcolumn{
+float: left;
+width: 20%; /*Width of right column in percentage*/
+background: #ddaa02;
+}
+
+#footer{
+clear: left;
+width: 100%;
+background: black;
+color: #FFF;
+text-align: center;
+padding: 4px 0;
+}
+
+#footer a{
+color: #FFFF80;
+}
+
+.innertube{
+margin: 10px; /*Margins for inner DIV inside each column (to provide padding)*/
+margin-top: 0;
+}
