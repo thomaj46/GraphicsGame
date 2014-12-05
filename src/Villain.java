@@ -1,5 +1,7 @@
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Random;
+
 import com.jogamp.opengl.util.FPSAnimator;
 import javax.media.opengl.*;
 import javax.media.opengl.glu.*;
@@ -73,18 +75,49 @@ public class Villain extends GameObject {
 	void chase(GameObject hero) {
 		double deltaX = Math.abs(this.x - hero.x);
 		double deltaZ = Math.abs(this.z - hero.z);
-
-		if (deltaX > deltaZ) {
-			if (this.x > hero.x) {
-				this.x -= the_game.villainSpeed;
+		Random rand = new Random();
+		
+		if ((rand.nextInt(10) % 2) == 0) {
+			if (deltaX > deltaZ) {
+				if (this.x > hero.x) {
+					this.x -= the_game.villainSpeed;
+				} else {
+					this.x += the_game.villainSpeed;
+				}
 			} else {
-				this.x += the_game.villainSpeed;;
+				if (this.z >= hero.z) {
+					this.z -= the_game.villainSpeed;
+				} else {
+					this.z += the_game.villainSpeed;
+				}
+			}
+		} else if ((rand.nextInt(10) % 3) == 0) {
+			if (deltaX > deltaZ) {
+				if (this.z >= hero.z) {
+					this.z += the_game.villainSpeed + .02;
+				} else {
+					this.z += the_game.villainSpeed - .12;
+				}
+			} else {
+				if (this.x > hero.x) {
+					this.x -= the_game.villainSpeed - .8;
+				} else {
+					this.x -= the_game.villainSpeed + .2;
+				}
 			}
 		} else {
-			if (this.z >= hero.z) {
-				this.z -= the_game.villainSpeed;;
+			if (deltaX > deltaZ) {
+				if (this.z >= hero.z) {
+					this.z -= the_game.villainSpeed;
+				} else {
+					this.z += the_game.villainSpeed;
+				}
 			} else {
-				this.z += the_game.villainSpeed;;
+				if (this.x > hero.x) {
+					this.x -= the_game.villainSpeed;
+				} else {
+					this.x += the_game.villainSpeed;
+				}
 			}
 		}
 	}

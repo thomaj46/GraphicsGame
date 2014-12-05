@@ -1,6 +1,8 @@
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import com.jogamp.graph.curve.opengl.TextRenderer;
 import com.jogamp.opengl.util.FPSAnimator;
@@ -19,9 +21,9 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 	static GLCapabilities caps;
 	static FPSAnimator animator;
 
-	static float WALLHEIGHT = 70.0f; // Some playing field parameters
+	static float WALLHEIGHT = 130.0f; // Some playing field parameters
 	static float ARENASIZE = 1000.0f;
-	static float EYEHEIGHT = 15.0f;
+	static float EYEHEIGHT = 25.0f;
 	static float HERO_VP = 0.625f;
 
 	static double upx = 0.0, upy = 1.0, upz = 0.0; // gluLookAt params
@@ -38,23 +40,34 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 	
 	static Texture[] texture = new Texture[3]; 
 	static double villainSpeed = .3;
+	int gameStatus = 0; // 0 - Retry, 1, Start over
+	Random random;
 
 	float ga[] = { 0.2f, 0.2f, 0.2f, 1.0f }; // global ambient light intensity
 	float la0[] = { 0.0f, 0.0f, 0.0f, 1.0f }; // light 0 ambient intensity
 	float ld0[] = { 1.0f, 1.0f, 1.0f, 1.0f }; // light 0 diffuse intensity
 	float lp0[] = { 0.0f, 1.0f, 1.0f, 0.0f }; // light 0 position
 	float ls0[] = { 1.0f, 1.0f, 1.0f, 1.0f }; // light 0 specular
-	float ma[] = { 0.02f, 0.2f, 0.02f, 1.0f }; // material ambient
-	float md[] = { 0.08f, 0.6f, 0.08f, 1.0f }; // material diffuse
-	float ms[] = { 0.6f, 0.7f, 0.6f, 1.0f }; // material specular
-	int me = 75; // shininess exponent
+	// Original
+//	float ma[] = { 0.02f, 0.2f, 0.02f, 1.0f }; // material ambient
+//	float md[] = { 0.08f, 0.6f, 0.08f, 1.0f }; // material diffuse
+//	float ms[] = { 0.6f, 0.7f, 0.6f, 1.0f }; // material specular
+//	int me = 75; // shininess exponent
+	float ma[] = { 0.02f, 0.0f, 0.02f, 1.0f }; // material ambient
+	float md[] = { 0.9f, 0.0f, 0.01f, 1.0f }; // material diffuse
+	float ms[] = { 0.2f, 0.2f, 0.3f, 1.0f }; // material specular
+	int me = 8; // shininess exponent
 	float red[] = { 1.0f, 0.0f, 0.0f, 1.0f }; // pure red
 	float blue[] = { 0.0f, 0.0f, 1.0f, 1.0f }; // pure blue
+	float grey[] = { 0.5f, 0.5f, 0.5f, 1.0f }; // pure grey
 	float yellow[] = { 1.0f, 1.0f, 0.0f, 1.0f }; // pure yellow
+	float tan[] = { 0.8549f, 0.7019f, 0.3372f, 1.0f }; // pure tan for the floor
 	int displayListBase;
 	int score;
 	int lastScore;
 	int highScore;
+	Villain[] villain_array;
+	int countVillains = 1;
 	
 	Hero the_hero; // Three objects on the playing field to
 	ThingWeAreSeeking the_thing; // start with, each with its own display list.
@@ -108,7 +121,12 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 											// 3 objects
 		the_hero = new Hero(eyex, 0.0, eyez, 39, 10.0, displayListBase, this, drawable); //135
 		the_thing = new ThingWeAreSeeking(ARENASIZE / 4.0, 0.0, -ARENASIZE / 4.0, 0, 30.0, displayListBase + 1, this, drawable);
-		the_villain = new Villain((3 * ARENASIZE) / 4.0, 0.0, -ARENASIZE / 4.0, 0, 10.0, displayListBase + 2, this, drawable);
+		//Create and fill Villain Array Max 30 Villains
+		villain_array = new Villain[30];
+		for (int i = 0; i < villain_array.length;i++) {
+			villain_array[i] = new Villain((3 * ARENASIZE) / 4.0, 0.0, -ARENASIZE / 4.0, 0, 10.0, displayListBase + 2, this, drawable);
+		}
+		//the_villain = new Villain((3 * ARENASIZE) / 4.0, 0.0, -ARENASIZE / 4.0, 0, 10.0, displayListBase + 2, this, drawable);
 
 		aspect = (double) width / (double) height;
 	    
@@ -130,31 +148,31 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 		int vert_offset = height / 6;
 		
 		// light grey background
-		gl.glClearColor(0.4f, 0.4f, 0.4f, 1.0f);
-		//Black Background
-		//gl.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		// gl.glClearColor(0.4f, 0.4f, 0.4f, 1.0f);
+		// Other Background
+		gl.glClearColor(0.0f, 0.0f, 1.0f, 0.2f);
 		gl.glClear(GL2.GL_DEPTH_BUFFER_BIT | GL2.GL_COLOR_BUFFER_BIT);
 		
 		// Score Box
 		gl.glViewport(625, 575, 400, 100);
 		gl.glDisable(GL2.GL_LIGHTING);
-		gl.glColor3f(1.0f, 0.0f, 0.0f); 
+		gl.glColor3f(1.0f, 1.0f, 0.0f);
 	    gl.glRasterPos2f(0.0f, 0.0f); // <-- position of text 
 	    glut.glutBitmapString(GLUT.BITMAP_HELVETICA_18, "High Score");
-	    gl.glColor3f(1.0f, 0.0f, 0.0f); 
+	    gl.glColor3f(1.0f, 1.0f, 0.0f);
 	    gl.glRasterPos2f(300.0f, 0.0f); // <-- position of text 
 	    glut.glutBitmapString(GLUT.BITMAP_HELVETICA_18, "Last Score");
-	    gl.glColor3f(1.0f, 0.0f, 0.0f); 
+	    gl.glColor3f(1.0f, 1.0f, 0.0f);
 	    gl.glRasterPos2f(600.0f, 0.0f); // <-- position of text 
 	    glut.glutBitmapString(GLUT.BITMAP_HELVETICA_18, "Current Score");
 	    gl.glViewport(625, 550, 400, 100);
-	    gl.glColor3f(1.0f, 0.0f, 0.0f); 
+	    gl.glColor3f(1.0f, 1.0f, 0.0f); 
 	    gl.glRasterPos2f(100.0f, 0.0f); // <-- position of text 
 	    glut.glutBitmapString(GLUT.BITMAP_HELVETICA_18, String.valueOf(highScore));
-	    gl.glColor3f(1.0f, 0.0f, 0.0f); 
+	    gl.glColor3f(1.0f, 1.0f, 0.0f);
 	    gl.glRasterPos2f(400.0f, 0.0f); // <-- position of text 
 	    glut.glutBitmapString(GLUT.BITMAP_HELVETICA_18, String.valueOf(lastScore));
-	    gl.glColor3f(1.0f, 0.0f, 0.0f); 
+	    gl.glColor3f(1.0f, 1.0f, 0.0f);
 	    gl.glRasterPos2f(700.0f, 0.0f); // <-- position of text 
 	    glut.glutBitmapString(GLUT.BITMAP_HELVETICA_18, String.valueOf(score));
 	    gl.glEnable(GL2.GL_LIGHTING);
@@ -185,7 +203,7 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 		showArena(drawable);
 		showObjects(drawable);
 		chaseHero();
-		checkCollisions();
+		checkCollisions(drawable);
 		gl.glFlush();
 	}
 
@@ -246,8 +264,8 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 
 		gl.glPopMatrix();
 
-		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_AMBIENT, blue, 0);
-		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, blue, 0);
+		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_AMBIENT, tan, 0);
+		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, tan, 0);
 		gl.glBegin(GL2.GL_POLYGON);
 		gl.glNormal3f(0.0f, 1.0f, 0.0f);
 		gl.glVertex3f(0.0f, 0.0f, 0.0f);
@@ -261,26 +279,50 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 	void showObjects(GLAutoDrawable drawable) {
 		
 		the_hero.draw_self(drawable);
-
 		the_thing.draw_self(drawable);
-		
-		the_villain.draw_self(drawable);
+		for(int i = 0; i < countVillains; i++) {
+			villain_array[i].draw_self(drawable);
+		}
+		//the_villain.draw_self(drawable);
 	}
 	
-	void checkCollisions() {
+	void checkCollisions(GLAutoDrawable drawable) {
+		Random random = new Random();
 		if(the_hero.willCollide(the_thing)) {
-			the_thing.teleport();
 			this.score += 1;
+			the_thing.teleport();
+			if (this.score % 3 == 0) {
+				countVillains += 1;
+			} 
 			villainSpeed += .05;
+			
 		}
-		
-		if (the_villain.willCollide(the_hero)) {
-			the_hero.reset();
-			the_villain.reset();
-			the_thing.reset();
-			checkForHighScore();
-			this.score = 0;
-			villainSpeed = .3;
+		for (int i = 0; i < countVillains; i++) {
+			if (villain_array[i].willCollide(the_hero)) {
+				gameStatus = 0;
+				
+				switch (gameStatus) {
+					case 0: // Reset All Scores and Start Over Entirely
+						the_hero.reset();
+						villain_array[i].reset();
+						the_thing.reset();
+						this.highScore = 0;
+						this.score = 0;
+						this.lastScore = 0;
+						villainSpeed = .3;
+						break;
+					case 1: // Keeps High Score Only and Start Over
+						the_hero.reset();
+						villain_array[i].reset();
+						the_thing.reset();
+						checkForHighScore();
+						this.score = 0;
+						this.lastScore = 0;
+						villainSpeed = .3;
+						break;
+				}
+				countVillains = 1;
+			}
 		}
 	}
 	
@@ -292,7 +334,10 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 	}
 	
 	void chaseHero() {
-		the_villain.chase(the_hero);
+		for (int i = 0; i < countVillains; i++) {
+			villain_array[i].chase(the_hero);
+		}
+		//the_villain.chase(the_hero);
 	}
 
 	public void dispose(GLAutoDrawable arg0) {
@@ -338,6 +383,14 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 		case KeyEvent.VK_D:
 			// Turn right
 			the_hero.turn(2);
+			break;
+		case KeyEvent.VK_ENTER:
+			// Reset the Game and all Scores
+			//gameStatus = 0;
+			break;
+		case KeyEvent.VK_SPACE:
+			// Try Again and Keep High Score
+			//gameStatus = 1;
 			break;
 		default:
 			break;

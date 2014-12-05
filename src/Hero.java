@@ -16,8 +16,15 @@ public class Hero extends GameObject {
 	GL2 gl = drawable.getGL().getGL2();
 	GLUT glut = my_playing_field.glut;
 
+//	gl.glBegin(GL2.GL_LINE_LOOP);
+//	gl.glVertex2d (x-1, y-1);
+//	gl.glVertex2d (x-1, y+1);
+//	gl.glVertex2d (x+1, y+1);
+//	gl.glVertex2d (x+1, y-1);
+//	gl.glEnd();
+	
 	gl.glNewList(my_display_list, GL2.GL_COMPILE);
-	glut.glutSolidCone( bounding_cir_rad, 25.0, 8, 4 );
+	glut.glutSolidCone( bounding_cir_rad + 5, 25.0, 8, 8 );
 	gl.glEndList();
   }
 
