@@ -76,7 +76,7 @@ public class Villain extends GameObject {
 		double deltaX = Math.abs(this.x - hero.x);
 		double deltaZ = Math.abs(this.z - hero.z);
 		Random rand = new Random();
-		
+
 		if ((rand.nextInt(10) % 2) == 0) {
 			if (deltaX > deltaZ) {
 				if (this.x > hero.x) {

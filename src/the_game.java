@@ -338,7 +338,6 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 		for (int i = 0; i < countVillains; i++) {
 			villain_array[i].chase(the_hero);
 		}
-		//the_villain.chase(the_hero);
 	}
 
 	public void dispose(GLAutoDrawable arg0) {

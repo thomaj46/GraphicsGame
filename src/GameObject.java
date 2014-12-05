@@ -31,8 +31,8 @@ public abstract class GameObject {
 		this.startZ = z;
 		this.degrees = degrees;
 		this.startDegrees = degrees;
-		this.xdir = Math.cos(((double)degrees)*Math.PI/180.0);
-		this.zdir = Math.sin(((double)degrees)*Math.PI/180.0);
+		this.xdir = Math.cos(Math.toRadians(this.degrees));
+		this.zdir = Math.sin(Math.toRadians(this.degrees));
 		this.startXdir = this.xdir;
 		this.startZdir = this.zdir;
 		this.bounding_cir_rad = bounding_cir_rad;
@@ -42,22 +42,54 @@ public abstract class GameObject {
 
     void turn(int degrees_rotation) {
 		degrees = (degrees + degrees_rotation) % 360;
-		xdir = Math.cos(((double)degrees)*Math.PI/180.0);
-		zdir = Math.sin(((double)degrees)*Math.PI/180.0);
+		xdir = Math.cos(Math.toRadians(this.degrees));
+		zdir = Math.sin(Math.toRadians(this.degrees));
     }
 
     void move(double speed) {		// Pass in negative speed for backward motion
 		x = x + speed * xdir;
 		z = z + speed * zdir;
-		
-		if (this.x <= 0 || this.x >= 1000)
+
+		if (this.x <= 0)
 		{
-			this.turn(-this.degrees);
+			this.xdir = -this.xdir;
+
+			if (this.zdir > 0)
+			{
+				this.degrees = (int)Math.toDegrees(Math.atan(this.zdir/this.xdir));
+			}
+			else
+			{
+				this.degrees = (int)Math.toDegrees(Math.atan(this.zdir/this.xdir));
+			}
+		}
+
+		if (this.x >= 1000)
+		{
+			this.xdir = -this.xdir;
+
+			if (this.zdir > 0)
+			{
+				this.degrees = (int)Math.toDegrees(Math.atan(this.zdir/this.xdir)) + 180;
+			}
+			else
+			{
+				this.degrees = (int)Math.toDegrees(Math.atan(this.zdir/this.xdir)) + 180;
+			}
 		}
 
 		if (this.z >= 0 || this.z <= -1000)
 		{
-			this.turn(-this.degrees);
+			this.zdir = -this.zdir;
+
+			if (this.xdir > 0)
+			{
+				this.degrees = (int)Math.toDegrees(Math.atan(this.zdir/this.xdir));
+			}
+			else
+			{
+				this.degrees = (int)Math.toDegrees(Math.atan(this.zdir/this.xdir)) + 180;
+			}
 		}
     }
 
