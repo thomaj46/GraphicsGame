@@ -25,6 +25,7 @@ public class Hero extends GameObject {
 	if (the_game.heroAlive) {
 		// Draw the usual Hero on the 2D
 		gl.glNewList(my_display_list, GL2.GL_COMPILE);
+		gl.glLightfv(GL2.GL_LIGHT1, GL2.GL_DIFFUSE, new float[]{ 1.0f, 1.0f, 1.0f, 1.0f }, 0);
 		glut.glutSolidCone( bounding_cir_rad + 5, 25.0, 8, 8 );
 		gl.glEndList(); 
     } else {

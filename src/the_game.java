@@ -23,7 +23,7 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 	static GLCapabilities caps;
 	static FPSAnimator animator;
 
-	static float WALLHEIGHT = 200.0f; // Some playing field parameters
+	static float WALLHEIGHT = 130.0f; // Some playing field parameters
 	static float ARENASIZE = 1000.0f;
 	static float EYEHEIGHT = 25.0f;
 	static float HERO_VP = 0.625f;
@@ -49,14 +49,14 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 	float la0[] = { 0.0f, 0.0f, 0.0f, 1.0f }; // light 0 ambient intensity
 	float ld0[] = { 1.0f, 1.0f, 1.0f, 1.0f }; // light 0 diffuse intensity
 	float lp0[] = { 0.0f, 1.0f, 1.0f, 0.0f }; // light 0 position
-	float ls0[] = { 1.0f, 1.0f, 1.0f, 1.0f }; // light 0 specular
+	float ls0[] = { 0.0f, 0.0f, 0.0f, 1.0f }; // light 0 specular
 	// Original
 //	float ma[] = { 0.02f, 0.2f, 0.02f, 1.0f }; // material ambient
 //	float md[] = { 0.08f, 0.6f, 0.08f, 1.0f }; // material diffuse
 //	float ms[] = { 0.6f, 0.7f, 0.6f, 1.0f }; // material specular
 //	int me = 75; // shininess exponent
 	float ma[] = { 0.02f, 0.0f, 0.02f, 1.0f }; // material ambient
-	float md[] = { 0.5f, 0.5f, 0.05f, 1.0f }; // material diffuse
+	float md[] = { 0.9f, 0.0f, 0.01f, 1.0f }; // material diffuse
 	float ms[] = { 0.2f, 0.2f, 0.3f, 1.0f }; // material specular
 	int me = 8; // shininess exponent
 	float red[] = { 1.0f, 0.0f, 0.0f, 1.0f }; // pure red
@@ -70,6 +70,8 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 	int highScore;
 	Villain[] villain_array;
 	int countVillains = 1;
+	Texture floorTexture;
+	Texture wallTexture;
 
 	Hero the_hero; // Three objects on the playing field to
 	ThingWeAreSeeking the_thing; // start with, each with its own display list.
@@ -129,6 +131,10 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 			villainTexture = TextureIO.newTexture(data);
 			data = TextureIO.newTextureData(GLProfile.getDefault(), getClass().getResourceAsStream("firemap.jpg"), false, "jpg");
 			thingTexture = TextureIO.newTexture(data);
+			data = TextureIO.newTextureData(GLProfile.getDefault(), getClass().getResourceAsStream("floor.jpg"), false, "jpg");
+			floorTexture = TextureIO.newTexture(data);
+			data = TextureIO.newTextureData(GLProfile.getDefault(), getClass().getResourceAsStream("wall.jpg"), false, "jpg");
+			wallTexture = TextureIO.newTexture(data);
 		}
 		catch (IOException exc) {
 			exc.printStackTrace();
@@ -247,51 +253,85 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_SPECULAR, ms, 0);
 		gl.glMateriali(GL2.GL_FRONT, GL2.GL_SHININESS, me);
 
+		wallTexture.enable(gl);
+		wallTexture.bind(gl);
+		gl.glEnable(GL2.GL_TEXTURE_2D);
+
 		gl.glPushMatrix();
 		gl.glBegin(GL2.GL_POLYGON);
 		gl.glNormal3f(1.0f, 0.0f, 0.0f);
+		gl.glTexCoord2f(1, 0);
 		gl.glVertex3f(0.0f, 0.0f, 0.0f);
+		gl.glTexCoord2f(0, 0);
 		gl.glVertex3f(0.0f, 0.0f, -ARENASIZE);
+		gl.glTexCoord2f(0, 1);
 		gl.glVertex3f(0.0f, WALLHEIGHT, -ARENASIZE);
+		gl.glTexCoord2f(1, 1);
 		gl.glVertex3f(0.0f, WALLHEIGHT, 0.0f);
 		gl.glEnd();
 
 		gl.glBegin(GL2.GL_POLYGON);
 		gl.glNormal3f(-1.0f, 0.0f, 0.0f);
+		gl.glTexCoord2f(0, 0);
 		gl.glVertex3f(ARENASIZE, 0.0f, 0.0f);
+		gl.glTexCoord2f(0, 1);
 		gl.glVertex3f(ARENASIZE, WALLHEIGHT, 0.0f);
+		gl.glTexCoord2f(1, 1);
 		gl.glVertex3f(ARENASIZE, WALLHEIGHT, -ARENASIZE);
+		gl.glTexCoord2f(1, 0);
 		gl.glVertex3f(ARENASIZE, 0.0f, -ARENASIZE);
 		gl.glEnd();
 
 		gl.glBegin(GL2.GL_POLYGON);
 		gl.glNormal3f(0.0f, 0.0f, 1.0f);
+		gl.glTexCoord2f(1, 0);
 		gl.glVertex3f(0.0f, 0.0f, -ARENASIZE);
+		gl.glTexCoord2f(0, 0);
 		gl.glVertex3f(ARENASIZE, 0.0f, -ARENASIZE);
+		gl.glTexCoord2f(0, 1);
 		gl.glVertex3f(ARENASIZE, WALLHEIGHT, -ARENASIZE);
+		gl.glTexCoord2f(1, 1);
 		gl.glVertex3f(0.0f, WALLHEIGHT, -ARENASIZE);
 		gl.glEnd();
 
 		gl.glBegin(GL2.GL_POLYGON);
 		gl.glNormal3f(0.0f, 0.0f, -1.0f);
+		gl.glTexCoord2f(1, 0);
 		gl.glVertex3f(0.0f, 0.0f, 0.0f);
+		gl.glTexCoord2f(1, 1);
 		gl.glVertex3f(0.0f, WALLHEIGHT, 0.0f);
+		gl.glTexCoord2f(0, 1);
 		gl.glVertex3f(ARENASIZE, WALLHEIGHT, 0.0f);
+		gl.glTexCoord2f(0, 0);
 		gl.glVertex3f(ARENASIZE, 0.0f, 0.0f);
 		gl.glEnd();
-
+		wallTexture.disable(gl);
+		
 		gl.glPopMatrix();
 
+		floorTexture.enable(gl);
+		floorTexture.bind(gl);
+		gl.glEnable(GL2.GL_TEXTURE_2D);
+		
 		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_AMBIENT, tan, 0);
 		gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_DIFFUSE, tan, 0);
 		gl.glBegin(GL2.GL_POLYGON);
 		gl.glNormal3f(0.0f, 1.0f, 0.0f);
+		
+		gl.glTexCoord2f(0, 0);
 		gl.glVertex3f(0.0f, 0.0f, 0.0f);
+		
+		gl.glTexCoord2f(1, 0);
 		gl.glVertex3f(ARENASIZE, 0.0f, 0.0f);
+		
+		gl.glTexCoord2f(1, 1);
 		gl.glVertex3f(ARENASIZE, 0.0f, -ARENASIZE);
+		
+		gl.glTexCoord2f(0, 1);
 		gl.glVertex3f(0.0f, 0.0f, -ARENASIZE);
 		gl.glEnd();
-
+		
+		floorTexture.disable(gl);
 	}
 
 	void showObjects(GLAutoDrawable drawable) {
@@ -336,6 +376,7 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 						villain_array[i].reset();
 						the_thing.reset();
 						checkForHighScore();
+						this.score = 0;
 						this.lastScore = this.score;
 						this.score = 0;
 						villainSpeed = .3;
