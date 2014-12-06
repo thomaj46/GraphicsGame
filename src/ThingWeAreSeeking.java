@@ -90,6 +90,7 @@ public class ThingWeAreSeeking extends GameObject {
 		glu.gluQuadricDrawStyle(top, GLU.GLU_FILL); // smooth shaded
 		glu.gluQuadricNormals(top, GLU.GLU_SMOOTH);
 		gl.glTranslated(x, 40.0, z);
+		gl.glScalef(-1, -1, -1);
 		gl.glRotated(-90.0, 1.0, 0.0, 0.0);
 		glu.gluDisk(top, 0.0, 25.0, 15, 5);
 		gl.glPopMatrix();

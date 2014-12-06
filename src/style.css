@@ -8,13 +8,14 @@ b{font-size: 110%;}
 em{color: red;}
 
 #topsection{
-background: #EAEAEA;
+background: #398;
 height: 90px; /*Height of top section*/
 }
 
 #topsection h1{
 margin: 0;
-padding-top: 15px;
+padding-top: 35px;
+margin-left: 50px;
 }
 
 #contentwrapper{
@@ -43,15 +44,15 @@ margin: 0 190px 0 20% /*Set margin to 0 (LeftColumnWidth) 0 (RightColumnWidth)*/
 
 #leftcolumn{
 float: left;
-width: 190px; /*Width of left column in pixels*/
-margin-left: -190px; /*Set left margin to -(LeftColumnWidth)*/
-background: #C8FC98;
+width: 20%; /*Width of right column in percentage*/
+background: #ddaa02;
 }
 
 #rightcolumn{
 float: left;
-width: 20%; /*Width of right column in percentage*/
-background: #ddaa02;
+width: 190px; /*Width of left column in pixels*/
+margin-left: -190px; /*Set left margin to -(LeftColumnWidth)*/
+background: #C8FC98;
 }
 
 #footer{

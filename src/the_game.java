@@ -1,5 +1,6 @@
 
 import java.awt.*;
+
 import java.awt.event.*;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,6 +17,21 @@ import javax.swing.*;
 
 import com.jogamp.opengl.util.gl2.GLUT;
 
+/*
+ *   GOLLY GEE WHIZ POINTS - TAKEN FROM OUR MANUAL (BRIAN and JOHN)
+ *    We have up to 30 Villains that can be spawned against the Hero. Every 3rd point in the game unlocks a new Villain appearance.
+ *    
+ *    Each Villain that spawns throughout the game has intellegent motion and always chases the Hero. This creates the "Horde" look 
+ *    although there are random movements that avoid making the mob look unnatural
+ *    
+ *    Each Villain also speeds up a fraction each time the Hero reaches the Goal. The Mob essentially becomes 'more athletic' while the Hero stays the same.
+ *    
+ *    We used the Epcot.off file and fireball texture to make the goal look like a ball of fire.
+ *    
+ *    We used 3 Scoring sets {High, Last, Current}. We did this because you simply can't win the game and the high score and last 
+ *    allows a user to still have fun even though they can't win.
+ *    
+ */
 public class the_game extends JFrame implements GLEventListener, KeyListener {
 	static GLU glu;
 	static GLUT glut;
@@ -180,11 +196,15 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 
 		// Game Over Text, only used when the villain collides with the hero
 		if (!heroAlive) {
-			gl.glViewport(200, 300, 200, 100);
 			gl.glDisable(GL2.GL_LIGHTING);
+			gl.glViewport(150, 200, 400, 100);
 			gl.glColor3f(1.0f, 1.0f, 0.0f);
-			gl.glRasterPos2f(10.0f, 0.0f); // <-- position of text
+			gl.glRasterPos2f(140.0f, 0.0f); // <-- position of text
 			glut.glutBitmapString(GLUT.BITMAP_HELVETICA_18, "Game Over, Try Again");
+			gl.glViewport(150, 100, 425, 400);
+			gl.glColor3f(1.0f, 1.0f, 0.0f);
+			gl.glRasterPos2f(0.0f, 0.0f); // <-- position of text
+			glut.glutBitmapString(GLUT.BITMAP_HELVETICA_12, "Press <Enter> to Reset All Scores, or wait for restart");
 			gl.glEnable(GL2.GL_LIGHTING);
 			if (!heroAlive) {
 				// Frame rate-based Game Over pause implementation
@@ -378,30 +398,36 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 		}
 		for (int i = 0; i < countVillains; i++) {
 			if (villain_array[i].willCollide(the_hero)) {
-				
-				switch (gameStatus) {
-					case 0: // Reset All Scores and Start Over Entirely
-						the_hero.reset();
-						villain_array[i].reset();
-						the_thing.reset();
-						this.highScore = 0;
-						this.score = 0;
-						this.lastScore = 0;
-						villainSpeed = .3;
-						heroAlive = false;
-						break;
-					case 1: // Keeps High Score and Last Score and Start Over
-						the_hero.reset();
-						villain_array[i].reset();
-						the_thing.reset();
-						checkForHighScore();
-						this.score = 0;
-						this.lastScore = this.score;
-						this.score = 0;
-						villainSpeed = .3;
-						heroAlive = false;
-						break;
-				}
+				the_hero.reset();
+				villain_array[i].reset();
+				the_thing.reset();
+				checkForHighScore();
+				this.lastScore = this.score;
+				this.score = 0;
+				villainSpeed = .3;
+				heroAlive = false;
+//				switch (gameStatus) {
+//					case 0: // Reset All Scores and Start Over Entirely
+//						the_hero.reset();
+//						villain_array[i].reset();
+//						the_thing.reset();
+//						this.highScore = 0;
+//						this.score = 0;
+//						this.lastScore = 0;
+//						villainSpeed = .3;
+//						heroAlive = false;
+//						break;
+//					case 1: // Keeps High Score and Last Score and Start Over
+//						the_hero.reset();
+//						villain_array[i].reset();
+//						the_thing.reset();
+//						checkForHighScore();
+//						this.lastScore = this.score;
+//						this.score = 0;
+//						villainSpeed = .3;
+//						heroAlive = false;
+//						break;
+//				}
 				countVillains = 1;
 			}
 		}
@@ -465,13 +491,19 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 					// Turn right
 					the_hero.turn(3);
 					break;
+				default:
+					break;
+			}
+		} else {
+			switch (ch) {
 				case KeyEvent.VK_ENTER:
 					// Reset the Game and all Scores
-					//gameStatus = 0;
-					break;
-				case KeyEvent.VK_SPACE:
-					// Try Again and Keep High Score
-					//gameStatus = 1;
+					this.highScore = 0;
+					this.score = 0;
+					this.lastScore = 0;
+					villainSpeed = .3;
+					heroAlive = true;
+					pause = 0;
 					break;
 				default:
 					break;
