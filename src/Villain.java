@@ -63,6 +63,7 @@ public class Villain extends GameObject {
 		rotation += 3;
 		gl.glPushMatrix();
 		gl.glTranslated(x, 0.0, z);
+		gl.glScaled(3, 3, 3);
 		gl.glRotated(rotation, 0, 1, 0);
 		gl.glCallList(my_display_list);
 		gl.glPopMatrix();

@@ -23,7 +23,7 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 	static GLCapabilities caps;
 	static FPSAnimator animator;
 
-	static float WALLHEIGHT = 130.0f; // Some playing field parameters
+	static float WALLHEIGHT = 250.0f; // Some playing field parameters
 	static float ARENASIZE = 1000.0f;
 	static float EYEHEIGHT = 25.0f;
 	static float HERO_VP = 0.625f;
@@ -72,6 +72,7 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 	int countVillains = 1;
 	Texture floorTexture;
 	Texture wallTexture;
+	int pause;
 
 	Hero the_hero; // Three objects on the playing field to
 	ThingWeAreSeeking the_thing; // start with, each with its own display list.
@@ -174,9 +175,27 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 		// light grey background
 		// gl.glClearColor(0.4f, 0.4f, 0.4f, 1.0f);
 		// Other Background
-		gl.glClearColor(0.0f, 0.0f, 1.0f, 0.2f);
+		gl.glClearColor(0.0f, 0.0f, 0.0f, 0.2f);
 		gl.glClear(GL2.GL_DEPTH_BUFFER_BIT | GL2.GL_COLOR_BUFFER_BIT);
 
+		// Game Over Text, only used when the villain collides with the hero
+		if (!heroAlive) {
+			gl.glViewport(200, 300, 200, 100);
+			gl.glDisable(GL2.GL_LIGHTING);
+			gl.glColor3f(1.0f, 1.0f, 0.0f);
+			gl.glRasterPos2f(10.0f, 0.0f); // <-- position of text
+			glut.glutBitmapString(GLUT.BITMAP_HELVETICA_18, "Game Over, Try Again");
+			gl.glEnable(GL2.GL_LIGHTING);
+			if (!heroAlive) {
+				// Frame rate-based Game Over pause implementation
+				pause += 1;
+				if (pause == 200) {
+					heroAlive = true;
+					pause = 0;
+				}
+			}
+		}
+			
 		// Score Box
 		gl.glViewport(625, 575, 400, 100);
 		gl.glDisable(GL2.GL_LIGHTING);
@@ -223,11 +242,13 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 		gl.glMatrixMode(GL2.GL_MODELVIEW);
 		gl.glLoadIdentity();
 		glu.gluLookAt(500., 100., -500., 500., 0., -500., 0., 0., -1.);
-
+		
 		showArena(drawable);
 		showObjects(drawable);
-		chaseHero();
-		checkCollisions(drawable);
+		if (heroAlive) {
+			chaseHero();
+			checkCollisions(drawable);
+		}		
 		gl.glFlush();
 	}
 
@@ -357,9 +378,7 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 		}
 		for (int i = 0; i < countVillains; i++) {
 			if (villain_array[i].willCollide(the_hero)) {
-				gameStatus = 1;
-
-
+				
 				switch (gameStatus) {
 					case 0: // Reset All Scores and Start Over Entirely
 						the_hero.reset();
@@ -382,11 +401,6 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 						villainSpeed = .3;
 						heroAlive = false;
 						break;
-				}
-				try {
-					TimeUnit.SECONDS.sleep(5);
-				} catch (InterruptedException e) {
-					//Handle exception
 				}
 				countVillains = 1;
 			}
@@ -421,47 +435,48 @@ public class the_game extends JFrame implements GLEventListener, KeyListener {
 
 	public void keyPressed(KeyEvent key) {
 		int ch = key.getKeyCode();
-		switch (ch) {
-			case 27:
-				new Thread() {
-					public void run() {
-						animator.stop();
-					}
-				}.start();
-				System.exit(0);
-				break;
-			case KeyEvent.VK_DOWN:
-			case KeyEvent.VK_S:
-				// Move backward
-				the_hero.move(-8.0);
-				break;
-			case KeyEvent.VK_UP:
-			case KeyEvent.VK_W:
-				// Move forward
-				the_hero.move(8.0);
-				break;
-			case KeyEvent.VK_LEFT:
-			case KeyEvent.VK_A:
-				// Turn left
-				the_hero.turn(-2);
-				break;
-			case KeyEvent.VK_RIGHT:
-			case KeyEvent.VK_D:
-				// Turn right
-				the_hero.turn(2);
-				break;
-			case KeyEvent.VK_ENTER:
-				// Reset the Game and all Scores
-				//gameStatus = 0;
-				break;
-			case KeyEvent.VK_SPACE:
-				// Try Again and Keep High Score
-				//gameStatus = 1;
-				break;
-			default:
-				break;
+		if (heroAlive) {
+			switch (ch) {
+				case 27:
+					new Thread() {
+						public void run() {
+							animator.stop();
+						}
+					}.start();
+					System.exit(0);
+					break;
+				case KeyEvent.VK_DOWN:
+				case KeyEvent.VK_S:
+					// Move backward
+					the_hero.move(-8.0);
+					break;
+				case KeyEvent.VK_UP:
+				case KeyEvent.VK_W:
+					// Move forward
+					the_hero.move(8.0);
+					break;
+				case KeyEvent.VK_LEFT:
+				case KeyEvent.VK_A:
+					// Turn left
+					the_hero.turn(-3);
+					break;
+				case KeyEvent.VK_RIGHT:
+				case KeyEvent.VK_D:
+					// Turn right
+					the_hero.turn(3);
+					break;
+				case KeyEvent.VK_ENTER:
+					// Reset the Game and all Scores
+					//gameStatus = 0;
+					break;
+				case KeyEvent.VK_SPACE:
+					// Try Again and Keep High Score
+					//gameStatus = 1;
+					break;
+				default:
+					break;
+			}
 		}
-
 	}
 
 	public void keyReleased(KeyEvent key) {

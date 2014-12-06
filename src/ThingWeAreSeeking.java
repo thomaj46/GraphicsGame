@@ -98,7 +98,7 @@ public class ThingWeAreSeeking extends GameObject {
 
 		gl.glPushMatrix();
 		gl.glTranslated(x, 20.0, z);
-		gl.glScalef(5, 5, 5);
+		gl.glScalef(20, 20, 20);
 		gl.glCallList(my_display_list);
 		gl.glPopMatrix();
 
